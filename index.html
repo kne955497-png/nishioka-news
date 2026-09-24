@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: white;
+  font-family: Arial, "Noto Sans JP", sans-serif;
+  color: #111;
+}
+
+.news-item {
+  width: 100%;
+  min-height: 120px;
+  border-bottom: 1px solid #222;
+
+  display: flex;
+  align-items: center;
+  gap: 25px;
+
+  padding: 25px 0;
+}
+
+.date {
+  width: 230px;
+  flex-shrink: 0;
+
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.message {
+  flex: 1;
+
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 130px;
+  height: 58px;
+
+  border: 2px solid #111;
+
+  color: #111;
+  text-decoration: none;
+  font-size: 18px;
+
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .news-item {
+    min-height: 90px;
+    gap: 10px;
+    padding: 15px 5px;
+  }
+
+  .date {
+    width: auto;
+    font-size: 14px;
+  }
+
+  .message {
+    font-size: 14px;
+  }
+
+  .button {
+    width: 70px;
+    height: 42px;
+    font-size: 13px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="news-item">
+
+  <div class="date" id="youtube-date">
+    ----.--.--
+  </div>
+
+  <div class="message">
+    YOUTUBEがUPされました！
+  </div>
+
+  <a
+    class="button"
+    id="youtube-link"
+    href="https://www.youtube.com/@tube2669"
+    target="_blank"
+  >
+    クリック
+  </a>
+
+</div>
+
+</body>
+</html>
