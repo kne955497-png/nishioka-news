@@ -1,0 +1,104 @@
+name: Update YouTube News
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update YouTube news
+        run: |
+          python - <<'PY'
+          import urllib.request
+          import xml.etree.ElementTree as ET
+          import re
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          CHANNEL_ID = "UChM1p5-nq7415z568WGx5hw"
+
+          url = (
+              "https://www.youtube.com/feeds/videos.xml?channel_id="
+              + CHANNEL_ID
+          )
+
+          with urllib.request.urlopen(url) as response:
+              xml_data = response.read()
+
+          root = ET.fromstring(xml_data)
+
+          ns = {
+              "atom": "http://www.w3.org/2005/Atom"
+          }
+
+          entry = root.find("atom:entry", ns)
+
+          if entry is None:
+              raise Exception("YouTube動画が見つかりません")
+
+          published = entry.find("atom:published", ns).text
+
+          video_link = None
+
+          for link in entry.findall("atom:link", ns):
+              if link.attrib.get("rel") == "alternate":
+                  video_link = link.attrib.get("href")
+                  break
+
+          dt = datetime.fromisoformat(
+              published.replace("Z", "+00:00")
+          ).astimezone(ZoneInfo("Asia/Tokyo"))
+
+          formatted_date = dt.strftime("%Y.%m.%d")
+
+          with open("index.html", "r", encoding="utf-8") as f:
+              html = f.read()
+
+          html = re.sub(
+              r'<div class="date" id="youtube-date">.*?</div>',
+              f'<div class="date" id="youtube-date">{formatted_date}</div>',
+              html,
+              flags=re.DOTALL
+          )
+
+          html = re.sub(
+              r'id="youtube-link"\s+href="[^"]*"',
+              f'id="youtube-link" href="{video_link}"',
+              html
+          )
+
+          with open("index.html", "w", encoding="utf-8") as f:
+              f.write(html)
+
+          print("Updated:", formatted_date, video_link)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add index.html
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Update latest YouTube video"
+            git push
+          fi
