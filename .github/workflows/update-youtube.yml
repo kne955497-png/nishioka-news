@@ -49,7 +49,8 @@ jobs:
 
           print("YouTubeを取得中...")
 
-          params = urllib.parse.urlencode({
+          # まず最新動画のIDを取得
+          search_params = urllib.parse.urlencode({
               "part": "snippet",
               "channelId": YOUTUBE_CHANNEL_ID,
               "maxResults": 30,
@@ -58,32 +59,70 @@ jobs:
               "key": YOUTUBE_API_KEY
           })
 
-          url = (
+          search_url = (
               "https://www.googleapis.com/youtube/v3/search?"
-              + params
+              + search_params
           )
 
-          with urllib.request.urlopen(url) as response:
-              youtube_data = json.load(response)
+          with urllib.request.urlopen(search_url) as response:
+              search_data = json.load(response)
 
-          for item in youtube_data.get("items", []):
+          video_ids = []
 
-              video_id = item["id"]["videoId"]
+          for item in search_data.get("items", []):
+              video_id = item.get("id", {}).get("videoId")
 
-              published = item["snippet"]["publishedAt"]
+              if video_id:
+                  video_ids.append(video_id)
 
-              dt = datetime.fromisoformat(
-                  published.replace("Z", "+00:00")
-              ).astimezone(JST)
+          print("YouTube動画ID:", len(video_ids), "件")
 
-              news.append({
-                  "datetime": dt,
-                  "date": dt.strftime("%Y.%m.%d"),
-                  "message": "YOUTUBEがUPされました！",
-                  "url": f"https://www.youtube.com/watch?v={video_id}"
+
+          # 各動画の正式な公開日時を取得
+          if video_ids:
+
+              videos_params = urllib.parse.urlencode({
+                  "part": "snippet",
+                  "id": ",".join(video_ids),
+                  "key": YOUTUBE_API_KEY
               })
 
-          print("YouTube:", len(youtube_data.get("items", [])), "件")
+              videos_url = (
+                  "https://www.googleapis.com/youtube/v3/videos?"
+                  + videos_params
+              )
+
+              with urllib.request.urlopen(videos_url) as response:
+                  videos_data = json.load(response)
+
+              for item in videos_data.get("items", []):
+
+                  video_id = item["id"]
+
+                  snippet = item.get("snippet", {})
+
+                  published = snippet.get("publishedAt")
+
+                  if not published:
+                      continue
+
+                  dt = datetime.fromisoformat(
+                      published.replace("Z", "+00:00")
+                  ).astimezone(JST)
+
+                  news.append({
+                      "datetime": dt,
+                      "date": dt.strftime("%Y.%m.%d"),
+                      "message": "YOUTUBEがUPされました！",
+                      "url": f"https://www.youtube.com/watch?v={video_id}",
+                      "source": "YouTube"
+                  })
+
+                  print(
+                      "YouTube:",
+                      dt.strftime("%Y.%m.%d %H:%M"),
+                      video_id
+                  )
 
 
           # =========================
@@ -94,21 +133,23 @@ jobs:
 
           fields = "id,media_type,media_url,permalink,timestamp"
 
-          params = urllib.parse.urlencode({
+          instagram_params = urllib.parse.urlencode({
               "fields": fields,
               "limit": 30,
               "access_token": INSTAGRAM_ACCESS_TOKEN
           })
 
-          url = (
+          instagram_url = (
               "https://graph.instagram.com/me/media?"
-              + params
+              + instagram_params
           )
 
           try:
 
-              with urllib.request.urlopen(url) as response:
+              with urllib.request.urlopen(instagram_url) as response:
                   instagram_data = json.load(response)
+
+              instagram_count = 0
 
               for item in instagram_data.get("data", []):
 
@@ -126,14 +167,13 @@ jobs:
                       "datetime": dt,
                       "date": dt.strftime("%Y.%m.%d"),
                       "message": "INSTAGRAMがUPされました！",
-                      "url": permalink
+                      "url": permalink,
+                      "source": "Instagram"
                   })
 
-              print(
-                  "Instagram:",
-                  len(instagram_data.get("data", [])),
-                  "件"
-              )
+                  instagram_count += 1
+
+              print("Instagram:", instagram_count, "件")
 
           except Exception as e:
               print("Instagram取得エラー:", e)
@@ -141,13 +181,34 @@ jobs:
 
 
           # =========================
-          # 日付順
+          # 新しい順に並び替え
           # =========================
 
           news.sort(
               key=lambda x: x["datetime"],
               reverse=True
           )
+
+
+          # =========================
+          # 確認用ログ
+          # =========================
+
+          print("")
+          print("===== NEWS 最新10件 =====")
+
+          for item in news[:10]:
+
+              print(
+                  item["datetime"].strftime("%Y.%m.%d %H:%M"),
+                  "|",
+                  item["source"],
+                  "|",
+                  item["url"]
+              )
+
+          print("=========================")
+          print("")
 
 
           # =========================
