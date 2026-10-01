@@ -1,4 +1,4 @@
-name: Update YouTube News
+name: Update YouTube & Instagram News
 
 on:
   schedule:
@@ -16,9 +16,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get YouTube videos and update NEWS
+      - name: Update NEWS
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
         run: |
           python3 <<'PY'
           import os
@@ -26,120 +27,151 @@ jobs:
           import re
           import urllib.request
           import urllib.parse
-          from datetime import datetime
+          from datetime import datetime, timezone, timedelta
 
-          # 西岡TubeのチャンネルID
-          CHANNEL_ID = "UChM1p5-nq7415z568WGx5hw"
+          # =========================
+          # 設定
+          # =========================
 
-          API_KEY = os.environ["YOUTUBE_API_KEY"]
+          YOUTUBE_API_KEY = os.environ["YOUTUBE_API_KEY"]
+          INSTAGRAM_ACCESS_TOKEN = os.environ["INSTAGRAM_ACCESS_TOKEN"]
 
-          # ----------------------------------------
-          # 1. チャンネルの「アップロード動画」プレイリストIDを取得
-          # ----------------------------------------
+          YOUTUBE_CHANNEL_ID = "UChM1p5-nq7415z568WGx5hw"
 
-          params = urllib.parse.urlencode({
-              "part": "contentDetails",
-              "id": CHANNEL_ID,
-              "key": API_KEY
-          })
+          JST = timezone(timedelta(hours=9))
 
-          url = (
-              "https://www.googleapis.com/youtube/v3/channels?"
-              + params
-          )
+          news = []
 
-          with urllib.request.urlopen(url) as response:
-              channel_data = json.load(response)
 
-          if not channel_data.get("items"):
-              raise Exception(
-                  "チャンネル情報を取得できませんでした。"
-                  "CHANNEL_IDまたはAPIキーを確認してください。"
-              )
+          # =========================
+          # YouTube
+          # =========================
 
-          uploads_playlist_id = (
-              channel_data["items"][0]
-              ["contentDetails"]
-              ["relatedPlaylists"]
-              ["uploads"]
-          )
-
-          print("Uploads playlist:", uploads_playlist_id)
-
-          # ----------------------------------------
-          # 2. 最新30本を取得
-          # ----------------------------------------
+          print("YouTubeを取得中...")
 
           params = urllib.parse.urlencode({
-              "part": "snippet,contentDetails",
-              "playlistId": uploads_playlist_id,
+              "part": "snippet",
+              "channelId": YOUTUBE_CHANNEL_ID,
               "maxResults": 30,
-              "key": API_KEY
+              "order": "date",
+              "type": "video",
+              "key": YOUTUBE_API_KEY
           })
 
           url = (
-              "https://www.googleapis.com/youtube/v3/playlistItems?"
+              "https://www.googleapis.com/youtube/v3/search?"
               + params
           )
 
           with urllib.request.urlopen(url) as response:
-              playlist_data = json.load(response)
+              youtube_data = json.load(response)
 
-          videos = []
+          for item in youtube_data.get("items", []):
 
-          for item in playlist_data.get("items", []):
+              video_id = item["id"]["videoId"]
 
-              video_id = item["contentDetails"]["videoId"]
+              published = item["snippet"]["publishedAt"]
 
-              # 実際に動画が公開された日時
-              published_at = (
-                  item["contentDetails"].get("videoPublishedAt")
-                  or item["snippet"]["publishedAt"]
-              )
-
-              # YouTubeはUTCなのでdatetimeとして読み込む
               dt = datetime.fromisoformat(
-                  published_at.replace("Z", "+00:00")
-              )
+                  published.replace("Z", "+00:00")
+              ).astimezone(JST)
 
-              # NEWS表示用
-              date = dt.strftime("%Y.%m.%d")
-
-              videos.append({
-                  "date": date,
-                  "url": (
-                      "https://www.youtube.com/watch?v="
-                      + video_id
-                  )
+              news.append({
+                  "datetime": dt,
+                  "date": dt.strftime("%Y.%m.%d"),
+                  "message": "YOUTUBEがUPされました！",
+                  "url": f"https://www.youtube.com/watch?v={video_id}"
               })
 
-              print(date, video_id)
+          print("YouTube:", len(youtube_data.get("items", [])), "件")
 
-          if not videos:
-              raise Exception("動画を取得できませんでした")
 
-          # ----------------------------------------
-          # 3. NEWSのHTMLを作成
-          # ----------------------------------------
+          # =========================
+          # Instagram
+          # =========================
+
+          print("Instagramを取得中...")
+
+          fields = "id,media_type,media_url,permalink,timestamp"
+
+          params = urllib.parse.urlencode({
+              "fields": fields,
+              "limit": 30,
+              "access_token": INSTAGRAM_ACCESS_TOKEN
+          })
+
+          url = (
+              "https://graph.instagram.com/me/media?"
+              + params
+          )
+
+          try:
+
+              with urllib.request.urlopen(url) as response:
+                  instagram_data = json.load(response)
+
+              for item in instagram_data.get("data", []):
+
+                  permalink = item.get("permalink")
+                  timestamp = item.get("timestamp")
+
+                  if not permalink or not timestamp:
+                      continue
+
+                  dt = datetime.fromisoformat(
+                      timestamp.replace("Z", "+00:00")
+                  ).astimezone(JST)
+
+                  news.append({
+                      "datetime": dt,
+                      "date": dt.strftime("%Y.%m.%d"),
+                      "message": "INSTAGRAMがUPされました！",
+                      "url": permalink
+                  })
+
+              print(
+                  "Instagram:",
+                  len(instagram_data.get("data", [])),
+                  "件"
+              )
+
+          except Exception as e:
+              print("Instagram取得エラー:", e)
+              raise
+
+
+          # =========================
+          # 日付順
+          # =========================
+
+          news.sort(
+              key=lambda x: x["datetime"],
+              reverse=True
+          )
+
+
+          # =========================
+          # HTML生成
+          # =========================
 
           news_items = []
 
-          for video in videos:
+          for item in news:
 
               news_items.append(f'''
             <div class="news-item">
 
               <div class="date">
-                {video["date"]}
+                {item["date"]}
               </div>
 
               <div class="message">
-                YOUTUBEがUPされました！
+                {item["message"]}
               </div>
 
               <a
                 class="button"
-                href="{video["url"]}"
+                href="{item["url"]}"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -150,11 +182,16 @@ jobs:
 
           generated_news = "\n".join(news_items)
 
-          # ----------------------------------------
-          # 4. index.htmlを書き換え
-          # ----------------------------------------
 
-          with open("index.html", "r", encoding="utf-8") as f:
+          # =========================
+          # index.html更新
+          # =========================
+
+          with open(
+              "index.html",
+              "r",
+              encoding="utf-8"
+          ) as f:
               html = f.read()
 
           start_marker = "<!-- YOUTUBE_NEWS_START -->"
@@ -162,7 +199,7 @@ jobs:
 
           if start_marker not in html or end_marker not in html:
               raise Exception(
-                  "index.htmlにNEWS用マーカーがありません"
+                  "NEWS用マーカーがありません"
               )
 
           pattern = (
@@ -186,11 +223,14 @@ jobs:
               flags=re.DOTALL
           )
 
-          with open("index.html", "w", encoding="utf-8") as f:
+          with open(
+              "index.html",
+              "w",
+              encoding="utf-8"
+          ) as f:
               f.write(html)
 
-          print("取得件数:", len(videos))
-          print("NEWS更新完了")
+          print("合計:", len(news), "件")
 
           PY
 
@@ -204,6 +244,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "NEWSはすでに最新です"
           else
-            git commit -m "Update YouTube news list"
+            git commit -m "Update YouTube and Instagram news"
             git push
           fi
