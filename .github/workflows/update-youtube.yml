@@ -16,80 +16,86 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get YouTube videos and update NEWS
-        shell: bash
+      - name: Install yt-dlp
         run: |
-          set -e
+          python3 -m pip install --upgrade yt-dlp
 
-          CHANNEL_ID="UChM1p5-nq7415z568WGx5hw"
-          RSS="https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}"
-
-          curl \
-            --fail \
-            --location \
-            --retry 5 \
-            --retry-delay 5 \
-            --retry-all-errors \
-            --user-agent "Mozilla/5.0" \
-            "$RSS" \
-            -o youtube.xml
-
+      - name: Get YouTube videos and update NEWS
+        run: |
           python3 <<'PY'
-          import xml.etree.ElementTree as ET
+          import subprocess
+          import json
           import re
           from datetime import datetime
-          from zoneinfo import ZoneInfo
-          from html import escape
 
-          # YouTube RSSを読み込み
-          root = ET.parse("youtube.xml").getroot()
+          CHANNEL_URL = "https://www.youtube.com/@tube2669/videos"
 
-          ns = {
-              "atom": "http://www.w3.org/2005/Atom"
-          }
+          # 最新30本を取得
+          result = subprocess.run(
+              [
+                  "yt-dlp",
+                  "--flat-playlist",
+                  "--playlist-end", "30",
+                  "--dump-json",
+                  CHANNEL_URL
+              ],
+              capture_output=True,
+              text=True,
+              check=True
+          )
 
-          entries = root.findall("atom:entry", ns)
+          lines = [
+              line for line in result.stdout.splitlines()
+              if line.strip()
+          ]
 
-          if not entries:
-              raise Exception("YouTube動画が見つかりません")
+          if not lines:
+              raise Exception("YouTube動画を取得できませんでした")
+
+          videos = []
+
+          for line in lines:
+              data = json.loads(line)
+
+              video_id = data.get("id")
+              timestamp = data.get("timestamp")
+              upload_date = data.get("upload_date")
+
+              if not video_id:
+                  continue
+
+              # 日付取得
+              if upload_date and len(upload_date) == 8:
+                  date = datetime.strptime(
+                      upload_date,
+                      "%Y%m%d"
+                  ).strftime("%Y.%m.%d")
+
+              elif timestamp:
+                  date = datetime.fromtimestamp(
+                      timestamp
+                  ).strftime("%Y.%m.%d")
+
+              else:
+                  date = "----.--.--"
+
+              videos.append({
+                  "date": date,
+                  "url": f"https://www.youtube.com/watch?v={video_id}"
+              })
+
+          if not videos:
+              raise Exception("表示可能な動画がありません")
 
           news_items = []
 
-          for entry in entries:
+          for video in videos:
 
-              published_element = entry.find("atom:published", ns)
-
-              if published_element is None:
-                  continue
-
-              published = published_element.text
-
-              video_url = None
-
-              for link in entry.findall("atom:link", ns):
-                  if link.attrib.get("rel") == "alternate":
-                      video_url = link.attrib.get("href")
-                      break
-
-              if not video_url:
-                  continue
-
-              # 日本時間へ変換
-              dt = datetime.fromisoformat(
-                  published.replace("Z", "+00:00")
-              ).astimezone(
-                  ZoneInfo("Asia/Tokyo")
-              )
-
-              date = dt.strftime("%Y.%m.%d")
-
-              video_url = escape(video_url, quote=True)
-
-              item = f'''
+              news_items.append(f'''
             <div class="news-item">
 
               <div class="date">
-                {date}
+                {video["date"]}
               </div>
 
               <div class="message">
@@ -98,23 +104,17 @@ jobs:
 
               <a
                 class="button"
-                href="{video_url}"
+                href="{video["url"]}"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 クリック
               </a>
 
-            </div>'''
-
-              news_items.append(item)
-
-          if not news_items:
-              raise Exception("表示できる動画がありません")
+            </div>''')
 
           generated_news = "\n".join(news_items)
 
-          # index.htmlを読み込み
           with open("index.html", "r", encoding="utf-8") as f:
               html = f.read()
 
@@ -150,7 +150,7 @@ jobs:
           with open("index.html", "w", encoding="utf-8") as f:
               f.write(html)
 
-          print("取得動画数:", len(news_items))
+          print(f"{len(videos)}件の動画を取得しました")
 
           PY
 
@@ -162,9 +162,8 @@ jobs:
           git add index.html
 
           if git diff --cached --quiet; then
-            echo "NEWSは最新です"
+            echo "NEWSはすでに最新です"
           else
             git commit -m "Update YouTube news list"
             git push
-          fi
           fi
