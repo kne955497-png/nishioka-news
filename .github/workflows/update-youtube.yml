@@ -16,77 +16,111 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install yt-dlp
-        run: |
-          python3 -m pip install --upgrade yt-dlp
-
       - name: Get YouTube videos and update NEWS
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           python3 <<'PY'
-          import subprocess
+          import os
           import json
           import re
+          import urllib.request
+          import urllib.parse
           from datetime import datetime
 
-          CHANNEL_URL = "https://www.youtube.com/@tube2669/videos"
+          # 西岡TubeのチャンネルID
+          CHANNEL_ID = "UChM1p5-nq7415z568WGx5hw"
 
-          result = subprocess.run(
-              [
-                  "yt-dlp",
-                  "--flat-playlist",
-                  "--extractor-args",
-                  "youtubetab:approximate_date",
-                  "--playlist-end", "30",
-                  "--dump-json",
-                  CHANNEL_URL
-              ],
-              capture_output=True,
-              text=True,
-              check=True
+          API_KEY = os.environ["YOUTUBE_API_KEY"]
+
+          # ----------------------------------------
+          # 1. チャンネルの「アップロード動画」プレイリストIDを取得
+          # ----------------------------------------
+
+          params = urllib.parse.urlencode({
+              "part": "contentDetails",
+              "id": CHANNEL_ID,
+              "key": API_KEY
+          })
+
+          url = (
+              "https://www.googleapis.com/youtube/v3/channels?"
+              + params
           )
+
+          with urllib.request.urlopen(url) as response:
+              channel_data = json.load(response)
+
+          if not channel_data.get("items"):
+              raise Exception(
+                  "チャンネル情報を取得できませんでした。"
+                  "CHANNEL_IDまたはAPIキーを確認してください。"
+              )
+
+          uploads_playlist_id = (
+              channel_data["items"][0]
+              ["contentDetails"]
+              ["relatedPlaylists"]
+              ["uploads"]
+          )
+
+          print("Uploads playlist:", uploads_playlist_id)
+
+          # ----------------------------------------
+          # 2. 最新30本を取得
+          # ----------------------------------------
+
+          params = urllib.parse.urlencode({
+              "part": "snippet,contentDetails",
+              "playlistId": uploads_playlist_id,
+              "maxResults": 30,
+              "key": API_KEY
+          })
+
+          url = (
+              "https://www.googleapis.com/youtube/v3/playlistItems?"
+              + params
+          )
+
+          with urllib.request.urlopen(url) as response:
+              playlist_data = json.load(response)
 
           videos = []
 
-          for line in result.stdout.splitlines():
+          for item in playlist_data.get("items", []):
 
-              if not line.strip():
-                  continue
+              video_id = item["contentDetails"]["videoId"]
 
-              data = json.loads(line)
+              # 実際に動画が公開された日時
+              published_at = (
+                  item["contentDetails"].get("videoPublishedAt")
+                  or item["snippet"]["publishedAt"]
+              )
 
-              video_id = data.get("id")
-              upload_date = data.get("upload_date")
-              timestamp = data.get("timestamp")
+              # YouTubeはUTCなのでdatetimeとして読み込む
+              dt = datetime.fromisoformat(
+                  published_at.replace("Z", "+00:00")
+              )
 
-              if not video_id:
-                  continue
-
-              # 日付を取得
-              if upload_date and len(upload_date) == 8:
-
-                  date = datetime.strptime(
-                      upload_date,
-                      "%Y%m%d"
-                  ).strftime("%Y.%m.%d")
-
-              elif timestamp:
-
-                  date = datetime.fromtimestamp(
-                      timestamp
-                  ).strftime("%Y.%m.%d")
-
-              else:
-                  date = "----.--.--"
+              # NEWS表示用
+              date = dt.strftime("%Y.%m.%d")
 
               videos.append({
                   "date": date,
-                  "url": f"https://www.youtube.com/watch?v={video_id}"
+                  "url": (
+                      "https://www.youtube.com/watch?v="
+                      + video_id
+                  )
               })
 
               print(date, video_id)
 
           if not videos:
               raise Exception("動画を取得できませんでした")
+
+          # ----------------------------------------
+          # 3. NEWSのHTMLを作成
+          # ----------------------------------------
 
           news_items = []
 
@@ -116,6 +150,10 @@ jobs:
 
           generated_news = "\n".join(news_items)
 
+          # ----------------------------------------
+          # 4. index.htmlを書き換え
+          # ----------------------------------------
+
           with open("index.html", "r", encoding="utf-8") as f:
               html = f.read()
 
@@ -123,7 +161,9 @@ jobs:
           end_marker = "<!-- YOUTUBE_NEWS_END -->"
 
           if start_marker not in html or end_marker not in html:
-              raise Exception("NEWS用マーカーがありません")
+              raise Exception(
+                  "index.htmlにNEWS用マーカーがありません"
+              )
 
           pattern = (
               re.escape(start_marker)
@@ -150,6 +190,7 @@ jobs:
               f.write(html)
 
           print("取得件数:", len(videos))
+          print("NEWS更新完了")
 
           PY
 
