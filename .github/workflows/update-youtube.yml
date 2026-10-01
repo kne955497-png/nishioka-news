@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get latest YouTube video
+      - name: Get YouTube videos and update NEWS
         shell: bash
         run: |
           set -e
@@ -39,60 +39,122 @@ jobs:
           import re
           from datetime import datetime
           from zoneinfo import ZoneInfo
+          from html import escape
 
+          # YouTube RSSを読み込み
           root = ET.parse("youtube.xml").getroot()
 
           ns = {
               "atom": "http://www.w3.org/2005/Atom"
           }
 
-          entry = root.find("atom:entry", ns)
+          entries = root.findall("atom:entry", ns)
 
-          if entry is None:
-              raise Exception("最新動画が見つかりません")
+          if not entries:
+              raise Exception("YouTube動画が見つかりません")
 
-          published = entry.find("atom:published", ns).text
+          news_items = []
 
-          video_url = None
+          for entry in entries:
 
-          for link in entry.findall("atom:link", ns):
-              if link.attrib.get("rel") == "alternate":
-                  video_url = link.attrib["href"]
-                  break
+              published_element = entry.find("atom:published", ns)
 
-          if not video_url:
-              raise Exception("動画URLが見つかりません")
+              if published_element is None:
+                  continue
 
-          dt = datetime.fromisoformat(
-              published.replace("Z", "+00:00")
-          ).astimezone(ZoneInfo("Asia/Tokyo"))
+              published = published_element.text
 
-          date = dt.strftime("%Y.%m.%d")
+              video_url = None
 
-          with open("index.html", encoding="utf-8") as f:
+              for link in entry.findall("atom:link", ns):
+                  if link.attrib.get("rel") == "alternate":
+                      video_url = link.attrib.get("href")
+                      break
+
+              if not video_url:
+                  continue
+
+              # 日本時間へ変換
+              dt = datetime.fromisoformat(
+                  published.replace("Z", "+00:00")
+              ).astimezone(
+                  ZoneInfo("Asia/Tokyo")
+              )
+
+              date = dt.strftime("%Y.%m.%d")
+
+              video_url = escape(video_url, quote=True)
+
+              item = f'''
+            <div class="news-item">
+
+              <div class="date">
+                {date}
+              </div>
+
+              <div class="message">
+                YOUTUBEがUPされました！
+              </div>
+
+              <a
+                class="button"
+                href="{video_url}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                クリック
+              </a>
+
+            </div>'''
+
+              news_items.append(item)
+
+          if not news_items:
+              raise Exception("表示できる動画がありません")
+
+          generated_news = "\n".join(news_items)
+
+          # index.htmlを読み込み
+          with open("index.html", "r", encoding="utf-8") as f:
               html = f.read()
 
-          html = re.sub(
-              r'<div class="date" id="youtube-date">.*?</div>',
-              f'<div class="date" id="youtube-date">{date}</div>',
-              html,
-              flags=re.S
+          start_marker = "<!-- YOUTUBE_NEWS_START -->"
+          end_marker = "<!-- YOUTUBE_NEWS_END -->"
+
+          if start_marker not in html or end_marker not in html:
+              raise Exception(
+                  "index.htmlにYOUTUBE_NEWS_START/ENDがありません"
+              )
+
+          pattern = (
+              re.escape(start_marker)
+              + r".*?"
+              + re.escape(end_marker)
+          )
+
+          replacement = (
+              start_marker
+              + "\n"
+              + generated_news
+              + "\n\n  "
+              + end_marker
           )
 
           html = re.sub(
-              r'id="youtube-link"\s+href="[^"]*"',
-              f'id="youtube-link" href="{video_url}"',
-              html
+              pattern,
+              replacement,
+              html,
+              flags=re.DOTALL
           )
 
           with open("index.html", "w", encoding="utf-8") as f:
               f.write(html)
 
-          print("DATE:", date)
-          print("VIDEO:", video_url)
+          print("取得動画数:", len(news_items))
+
           PY
 
-      - name: Save update
+      - name: Save NEWS
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -100,8 +162,9 @@ jobs:
           git add index.html
 
           if git diff --cached --quiet; then
-            echo "Already up to date"
+            echo "NEWSは最新です"
           else
-            git commit -m "Update YouTube news"
+            git commit -m "Update YouTube news list"
             git push
+          fi
           fi
