@@ -2,60 +2,344 @@
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;background:transparent;font-family:Arial,sans-serif;overflow:hidden}
-.wrap{position:relative;width:100%;max-width:480px;margin:0 auto;padding:4px 4px 28px}
+html,body{margin:0;background:transparent;font-family:Arial,sans-serif;overflow:hidden;color:#222}
+.wrap{position:relative;width:100%;max-width:500px;margin:0 auto;padding:2px 0 22px}
 .gallery{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;overscroll-behavior-x:contain}
 .gallery::-webkit-scrollbar{display:none}
-.gallery a{display:block;flex:0 0 100%;aspect-ratio:1;overflow:hidden;background:#eee;scroll-snap-align:start}
-.gallery img{width:100%;height:100%;object-fit:cover;display:block}
-.arrow{position:absolute;top:calc(50% - 14px);transform:translateY(-50%);z-index:2;border:0;border-radius:50%;width:36px;height:36px;background:rgba(0,0,0,.65);color:#fff;font-size:24px;cursor:pointer}
-.prev{left:10px}.next{right:10px}
-.dots{position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:center;gap:6px}
-.dot{width:6px;height:6px;border-radius:50%;background:#bbb}
+.slide{flex:0 0 50%;min-width:0;padding:0 5px;scroll-snap-align:start}
+.photo{display:block;aspect-ratio:1;overflow:hidden;background:#eee}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.details{padding:10px 3px;text-align:left}
+.date{font-size:12px;color:#777;margin-bottom:6px}
+.caption{font-size:13px;line-height:1.6;white-space:pre-wrap;overflow-y:auto;overflow-wrap:anywhere;max-height:125px;min-height:75px}
+.more{display:inline-block;margin-top:8px;font-size:12px;color:#555;text-decoration:underline}
+.arrow{position:absolute;top:100px;z-index:2;border:0;border-radius:50%;width:36px;height:36px;background:rgba(0,0,0,.65);color:white;font-size:24px;cursor:pointer}
+.prev{left:8px}.next{right:8px}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:7px}
+.dot{width:6px;height:6px;border-radius:50%;background:#ccc}
 .dot.active{background:#333}
 @media(prefers-reduced-motion:reduce){.gallery{scroll-behavior:auto}}
 </style></head><body>
-<div class="wrap" id="wrap"><button class="arrow prev" type="button" aria-label="前の投稿">&#8249;</button><div class="gallery" id="gallery"><a href="https://www.instagram.com/p/Dd_dXYUEirB/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.10.02"><img src="instagram-images/18077631413724337.jpg" alt="Instagram投稿 2026.10.02" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DdtdmtkEjMw/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.25"><img src="instagram-images/18636262336051376.jpg" alt="Instagram投稿 2026.09.25" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DdgnkjSkv3V/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.20"><img src="instagram-images/18630482590050477.jpg" alt="Instagram投稿 2026.09.20" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DdJouv6knA7/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.11"><img src="instagram-images/18088466918206607.jpg" alt="Instagram投稿 2026.09.11" loading="lazy"></a>
-<a href="https://www.instagram.com/p/Dc6BvaeEogi/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.05"><img src="instagram-images/18103083902580013.jpg" alt="Instagram投稿 2026.09.05" loading="lazy"></a>
-<a href="https://www.instagram.com/p/Dcld4HXkqkt/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.28"><img src="instagram-images/17957368043999011.jpg" alt="Instagram投稿 2026.08.28" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DcV6QjHEuta/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.22"><img src="instagram-images/17979505809076750.jpg" alt="Instagram投稿 2026.08.22" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DcBVVbWEqWg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.14"><img src="instagram-images/18089536436644235.jpg" alt="Instagram投稿 2026.08.14" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DbvRfjlkixy/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.07"><img src="instagram-images/17980023219061966.jpg" alt="Instagram投稿 2026.08.07" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DbdOfc0yFhK/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.07.31"><img src="instagram-images/18071944508389039.jpg" alt="Instagram投稿 2026.07.31" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DbLU_yyEhBR/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.07.24"><img src="instagram-images/18045173294642883.jpg" alt="Instagram投稿 2026.07.24" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DUrasfuEgDJ/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.02.13"><img src="instagram-images/18155026129435847.jpg" alt="Instagram投稿 2026.02.13" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DUaj8c9ksSg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.02.06"><img src="instagram-images/17971601811005507.jpg" alt="Instagram投稿 2026.02.06" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DUFsa4nEo9d/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.29"><img src="instagram-images/18374130286087453.jpg" alt="Instagram投稿 2026.01.29" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DTzUiOwEvfD/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.22"><img src="instagram-images/18062569439640019.jpg" alt="Instagram投稿 2026.01.22" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DThyCAeEoVt/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.15"><img src="instagram-images/18104478913704050.jpg" alt="Instagram投稿 2026.01.15" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DTaTGlhEkKA/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.12"><img src="instagram-images/18053590481389918.jpg" alt="Instagram投稿 2026.01.12" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DTEY6xPkuLp/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.04"><img src="instagram-images/17858933985579572.jpg" alt="Instagram投稿 2026.01.04" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DS1pIkKEq7W/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.29"><img src="instagram-images/18006227165830723.jpg" alt="Instagram投稿 2025.12.29" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DSZmqChkvlO/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.18"><img src="instagram-images/18159105274406195.jpg" alt="Instagram投稿 2025.12.18" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DSRgj42kkQh/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.15"><img src="instagram-images/17951116365061087.jpg" alt="Instagram投稿 2025.12.15" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DSHGxGZElxM/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.11"><img src="instagram-images/18304652635264662.jpg" alt="Instagram投稿 2025.12.11" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DR8bubckrfO/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.07"><img src="instagram-images/18088252885958313.jpg" alt="Instagram投稿 2025.12.07" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DRkBG2-EoVF/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.11.27"><img src="instagram-images/18086039303484123.jpg" alt="Instagram投稿 2025.11.27" loading="lazy"></a>
-<a href="https://www.instagram.com/p/DQyZDB6khT-/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.11.08"><img src="instagram-images/17863561761509184.jpg" alt="Instagram投稿 2025.11.08" loading="lazy"></a></div><button class="arrow next" type="button" aria-label="次の投稿">&#8250;</button><div class="dots" id="dots" aria-hidden="true"></div></div>
+<div class="wrap" id="wrap"><button class="arrow prev" type="button" aria-label="前の投稿">&#8249;</button><div class="gallery" id="gallery"><article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/Dd_dXYUEirB/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.10.02"><img src="instagram-images/18077631413724337.jpg" alt="Instagram投稿 2026.10.02" loading="lazy"></a>
+      <div class="details"><div class="date">2026.10.02</div><div class="caption" tabindex="0">📚ゼミ生の日常をのぞいてみよう👀✨
+
+第1弾は、ゼミ生のトンタッタ族長に「大学生活のリアル」をQ&amp;A形式で聞いてみました！
+
+みんなの知らないゼミ生の日常、公開します🔎✨️
+
+ぜひ最後までチェックしてみてください！
+
+#大学生の日常 #大学生活 #ゼミ生の日常 #大学生のリアル #キャンパスライフ</div><a class="more" href="https://www.instagram.com/p/Dd_dXYUEirB/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DdtdmtkEjMw/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.25"><img src="instagram-images/18636262336051376.jpg" alt="Instagram投稿 2026.09.25" loading="lazy"></a>
+      <div class="details"><div class="date">2026.09.25</div><div class="caption" tabindex="0">大学3回生のリアルな後期時間割を大公開！📚✨
+
+3回生になると授業はどれくらいある？
+1限はある？週何日大学に行く？空きコマは？？
+
+これから3回生になる人や、大学生活が気になる人はぜひ参考にしてみてください🫶🏻
+⁡
+#大学生 #大学生活 #大学生のリアル #大学生の日常 #キャンパスライフ</div><a class="more" href="https://www.instagram.com/p/DdtdmtkEjMw/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DdgnkjSkv3V/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.20"><img src="instagram-images/18630482590050477.jpg" alt="Instagram投稿 2026.09.20" loading="lazy"></a>
+      <div class="details"><div class="date">2026.09.20</div><div class="caption" tabindex="0">今回は、インスタ班の夏休みを紹介します！🌻 それぞれが夏休みに訪れた場所や、おすすめスポットを中心に紹介していきます！
+#龍谷大学#経営#西岡ゼミ#大学生の夏休み</div><a class="more" href="https://www.instagram.com/p/DdgnkjSkv3V/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DdJouv6knA7/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.11"><img src="instagram-images/18088466918206607.jpg" alt="Instagram投稿 2026.09.11" loading="lazy"></a>
+      <div class="details"><div class="date">2026.09.11</div><div class="caption" tabindex="0">今回はSNSマネジメント班の紹介をします！✨
+投稿作成やデータ分析を通して、各チームと連携しています！より多くの人にゼミの魅力を届けられるよう、みんなで協力しています！！
+
+#龍谷大学#西岡ゼミ#SNSマネジメント班
+#ゼミの日常#メンバー紹介</div><a class="more" href="https://www.instagram.com/p/DdJouv6knA7/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/Dc6BvaeEogi/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.09.05"><img src="instagram-images/18103083902580013.jpg" alt="Instagram投稿 2026.09.05" loading="lazy"></a>
+      <div class="details"><div class="date">2026.09.05</div><div class="caption" tabindex="0">今回はホームページ班の紹介をします！！✨️
+
+新入生や在校生に役立つ情報や、西岡ゼミをもっと知ってもらうきっかけを作っていきます！
+
+また、各SNSの更新情報をこれから載せていくので是非チェックしてみてください！
+
+#龍谷大学#西岡ゼミ#ホームページ班#ゼミの日常#メンバー紹介</div><a class="more" href="https://www.instagram.com/p/Dc6BvaeEogi/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/Dcld4HXkqkt/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.28"><img src="instagram-images/17957368043999011.jpg" alt="Instagram投稿 2026.08.28" loading="lazy"></a>
+      <div class="details"><div class="date">2026.08.28</div><div class="caption" tabindex="0">今回はYouTubeマネジメント班である『西岡マネジメンズ』の紹介をします！！✨️
+
+西岡TUBEの企画から投稿までを管理し、チャンネルの成長と登録者3000人を目指してます！！
+
+#龍谷大学#西岡ゼミ#YouTubeマネジメント班#ゼミの日常#メンバー紹介</div><a class="more" href="https://www.instagram.com/p/Dcld4HXkqkt/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DcV6QjHEuta/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.22"><img src="instagram-images/17979505809076750.jpg" alt="Instagram投稿 2026.08.22" loading="lazy"></a>
+      <div class="details"><div class="date">2026.08.22</div><div class="caption" tabindex="0">今回は、TikTok班のいんふるえんさーの紹介をします！
+
+ゼミ活動、メンバーの日常など「このゼミ楽しそう！」と思ってもらえるような動画を、楽しくゆるーく発信していきます✨️
+ぜひいいねとフォローお願いします🎶
+
+#龍谷大学 #西岡ゼミ #tiktok班 #ゼミの日常 #メンバー紹介</div><a class="more" href="https://www.instagram.com/p/DcV6QjHEuta/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DcBVVbWEqWg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.14"><img src="instagram-images/18089536436644235.jpg" alt="Instagram投稿 2026.08.14" loading="lazy"></a>
+      <div class="details"><div class="date">2026.08.14</div><div class="caption" tabindex="0">今回は西岡ゼミを選んだ理由についてゼミ生に聞いてみました！🧡
+
+ぜひゼミ選びの際の参考にしてみてください！✨
+
+#龍谷大学#ゼミ活動#西岡ゼミ#経営学部</div><a class="more" href="https://www.instagram.com/p/DcBVVbWEqWg/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DbvRfjlkixy/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.08.07"><img src="instagram-images/17980023219061966.jpg" alt="Instagram投稿 2026.08.07" loading="lazy"></a>
+      <div class="details"><div class="date">2026.08.07</div><div class="caption" tabindex="0">今回は、Instagram班のNgramメンバーを紹介します！
+
+ぜひ最後までチェックしてみてください💞
+これからも西岡ゼミの日常や活動の様子をどんどん発信していきます！
+
+フォローよろしくお願いします🫶🏻
+
+#龍谷大学 #龍谷大学経営学部 #西岡ゼミ #メンバー紹介</div><a class="more" href="https://www.instagram.com/p/DbvRfjlkixy/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DbdOfc0yFhK/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.07.31"><img src="instagram-images/18071944508389039.jpg" alt="Instagram投稿 2026.07.31" loading="lazy"></a>
+      <div class="details"><div class="date">2026.07.31</div><div class="caption" tabindex="0">本日はゼミの代表、西岡先生の紹介です！🧑‍🏫✨
+今回は先生によりプライベートなことを聞いてみました！
+
+#大学 #龍谷大学 #ゼミ活動 #西岡ゼミ #先生紹介</div><a class="more" href="https://www.instagram.com/p/DbdOfc0yFhK/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DbLU_yyEhBR/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.07.24"><img src="instagram-images/18045173294642883.jpg" alt="Instagram投稿 2026.07.24" loading="lazy"></a>
+      <div class="details"><div class="date">2026.07.24</div><div class="caption" tabindex="0">5期生によるInstagramの投稿がスタートします！
+⁡
+・ゼミの様子
+・学びの内容
+・日常
+⁡
+を投稿やストーリー機能を使って投稿していきます！ぜひチェックしてください♪
+⁡
+#龍谷大学 
+#西岡ゼミ
+#ゼミ紹介
+#ゼミ活動 
+#経営学部 
+
+西岡先生が学びのきっかけをつくり、ゼミ生同士で考え、意見を交わしながら学びを深めます✨
+実践を通して、一人ひとりが成長できるゼミです！
+
+ICTを活用しながら、組織の課題を発見・分析し、解決へ導く力を養います💻
+実践的な学びを通して、主体性やマネジメント力も身につけます！
+
+女子17名・男子12名
+計29名が所属しています！</div><a class="more" href="https://www.instagram.com/p/DbLU_yyEhBR/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DUrasfuEgDJ/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.02.13"><img src="instagram-images/18155026129435847.jpg" alt="Instagram投稿 2026.02.13" loading="lazy"></a>
+      <div class="details"><div class="date">2026.02.13</div><div class="caption" tabindex="0">こんにちは！西岡ゼミです！
+⁡
+今回は、高校生と大学生の違いをまとめてみました！
+大学生って結構自由なの…？？🤔
+授業や人間関係など、それぞれの違いを比べてみたので、是非参考にしてみてください！
+⁡
+YouTube｢西岡ちゅーぶ｣の方にも動画が上がっているのでそちらもチェックしてみてください！✅
+→https://youtu.be/Z3x-84Bg-Uw?si=fJMimS7ueAQWrpPB
+⁡
+#高校生  #大学生  #西岡ゼミ  #大学生活  #龍谷大学</div><a class="more" href="https://www.instagram.com/p/DUrasfuEgDJ/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DUaj8c9ksSg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.02.06"><img src="instagram-images/17971601811005507.jpg" alt="Instagram投稿 2026.02.06" loading="lazy"></a>
+      <div class="details"><div class="date">2026.02.06</div><div class="caption" tabindex="0">こんにちは！西岡ゼミです！！
+
+春から新生活が始まるこの時期、
+「大学生って1ヶ月にどれくらいお金使ってるんやろ？」
+って気になりませんか？💭
+
+今回は
+「大学生の1ヶ月のリアル出費」を
+西岡ゼミメンバーをもとにまとめてみました📊
+
+これからの大学生活や、
+毎月の出費を見直すきっかけとして
+ぜひ参考にしてみてください！！✨
+
+#龍谷大学#龍大生#西岡ゼミ#出費</div><a class="more" href="https://www.instagram.com/p/DUaj8c9ksSg/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DUFsa4nEo9d/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.29"><img src="instagram-images/18374130286087453.jpg" alt="Instagram投稿 2026.01.29" loading="lazy"></a>
+      <div class="details"><div class="date">2026.01.29</div><div class="caption" tabindex="0">こんにちは！西岡ゼミです！！
+⁡
+春から一人暮らしを始める人が多いと思いますが、何を買ったらいいのだろう？？と思ってるあなた🫵🏼
+⁡
+今回は「一人暮らしであったら便利なモノ」をまとめてみました！
+
+是非これからのお部屋の準備をしてみてください！😊
+⁡
+ #一人暮らし  #大学生  #龍谷大学  #西岡ゼミ  #龍大生</div><a class="more" href="https://www.instagram.com/p/DUFsa4nEo9d/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DTzUiOwEvfD/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.22"><img src="instagram-images/18062569439640019.jpg" alt="Instagram投稿 2026.01.22" loading="lazy"></a>
+      <div class="details"><div class="date">2026.01.22</div><div class="caption" tabindex="0">こんにちは！西岡ゼミです！！
+
+春から一人暮らしを始める人も多いこの時期🌸
+「どこを見て選べばいいの？」と迷っていませんか？👀
+
+今回は ｢一人暮らしの部屋選びのポイント｣をまとめてみました！
+
+✔ 立地
+✔ 家賃・契約
+✔ 建物・設備
+✔ 暮らしやすさ
+
+実際に住んでから気づくことも多いからこそ、内見のときのチェックが超重要！
+
+是非これからの部屋選びの参考にしてみてね！！✨️
+
+#一人暮らし #部屋探し #大学生  #龍谷大学  #西岡ゼミ</div><a class="more" href="https://www.instagram.com/p/DTzUiOwEvfD/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DThyCAeEoVt/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.15"><img src="instagram-images/18104478913704050.jpg" alt="Instagram投稿 2026.01.15" loading="lazy"></a>
+      <div class="details"><div class="date">2026.01.15</div><div class="caption" tabindex="0">西岡ゼミです！
+今回は大学生におすすめの資格です！📖
+大学生は授業にバイトにサークルと案外忙しい毎日だと思います！
+でも！資格は持っていたら就活で役立つものや、将来役に立つものまで多種多様です！
+資格勉強をしたことがなくて「なにを勉強したらいいかわからない」と思う人は大学生におすすめの資格をまとめたのでぜひ参考にしてみてください！
+ #おすすめの資格 #大学生  #西岡ゼミ #龍大生</div><a class="more" href="https://www.instagram.com/p/DThyCAeEoVt/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DTaTGlhEkKA/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.12"><img src="instagram-images/18053590481389918.jpg" alt="Instagram投稿 2026.01.12" loading="lazy"></a>
+      <div class="details"><div class="date">2026.01.12</div><div class="caption" tabindex="0">こんにちは！西岡ゼミです！
+
+今回はリアルな西岡ゼミの様子をお届けします‼️
+西岡ゼミのホームページが完成したので皆んなで確認している様子や、撮影のネタを考えている様子です！
+
+各班、頑張って活動しているので皆さん覗いてみてください！
+
+#西岡ゼミ　#ゼミの日常　#龍谷大学　#龍大</div><a class="more" href="https://www.instagram.com/p/DTaTGlhEkKA/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DTEY6xPkuLp/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2026.01.04"><img src="instagram-images/17858933985579572.jpg" alt="Instagram投稿 2026.01.04" loading="lazy"></a>
+      <div class="details"><div class="date">2026.01.04</div><div class="caption" tabindex="0">あけましておめでとうございます⛩西岡ゼミです🎍
+
+2026年がスタートしました✨
+今年もゼミでの活動の様子や日常の雰囲気など、西岡ゼミならではの内容をインスタグラムを通して発信していきます📝
+
+本年も西岡ゼミをよろしくお願いします🙂‍↕️✨
+
+#龍谷大学 #経営学部 #初詣 #お正月の過ごし方</div><a class="more" href="https://www.instagram.com/p/DTEY6xPkuLp/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DS1pIkKEq7W/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.29"><img src="instagram-images/18006227165830723.jpg" alt="Instagram投稿 2025.12.29" loading="lazy"></a>
+      <div class="details"><div class="date">2025.12.29</div><div class="caption" tabindex="0">こんにちは！西岡ゼミです！
+
+今回はゼミ生のクリスマスの様子を紹介します！
+パーティーをしたり、イルミネーションに行ったり、本当に楽しいクリスマスになりました！
+
+これで今年の投稿は以上になります。
+引き続き来年も西岡ゼミをよろしくお願いします🙇
+
+それでは良いお年を〜
+
+#クリスマス　#クリスマスフォト　#クリスマスパーティー
+#イルミネーション</div><a class="more" href="https://www.instagram.com/p/DS1pIkKEq7W/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DSZmqChkvlO/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.18"><img src="instagram-images/18159105274406195.jpg" alt="Instagram投稿 2025.12.18" loading="lazy"></a>
+      <div class="details"><div class="date">2025.12.18</div><div class="caption" tabindex="0">こんにちは！西岡ゼミです！
+今回は「受験当日の不安解消」について紹介してます📝
+
+入試まであと少しになりましたね！
+最後まで全力を尽くして頑張ってください！
+応援してます✨
+
+#大学受験 #共通テスト #大学受験生 #受験生 #高校生</div><a class="more" href="https://www.instagram.com/p/DSZmqChkvlO/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DSRgj42kkQh/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.15"><img src="instagram-images/17951116365061087.jpg" alt="Instagram投稿 2025.12.15" loading="lazy"></a>
+      <div class="details"><div class="date">2025.12.15</div><div class="caption" tabindex="0">阪急烏丸駅17番出口から徒歩3分。
+路地裏にある隠れ家カフェ｢sinoa｣🎀
+⁡
+店内はやさしい照明であたたかく、落ち着いた空間でクリスマス雰囲気を感じられます🎄
+⁡
+クリスマスメニューはプレートにミニデザートがたくさん🍰
+どれも可愛くて食べるのがもったいないくらい💕
+可愛いが詰まったモーニングプレートもあり、お洒落な朝活にもピッタリ✨️
+
+賑やかなクリスマスもいいけれど、静かで大人なクリスマス気分を…☕*°
+⁡
+
+#クリスマスカフェ  #クリスマス #京都カフェ #sinoa  #カフェ巡り京都</div><a class="more" href="https://www.instagram.com/p/DSRgj42kkQh/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DSHGxGZElxM/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.11"><img src="instagram-images/18304652635264662.jpg" alt="Instagram投稿 2025.12.11" loading="lazy"></a>
+      <div class="details"><div class="date">2025.12.11</div><div class="caption" tabindex="0">大阪メトロ御堂筋線梅田駅北改札口から徒歩5分。
+阪急百貨店9階にあるクリスマスマーケット🧑‍🎄
+
+真ん中には大きなイルミネーションツリーがあり、周りを明るく照らしています🌲✨
+
+店内はかわいいクリスマス雑貨や食べ物、スイーツをたくさん販売しているので、友人、恋人と行ってみてください。
+
+駅近で駅から直結なのがポイント📍
+
+#クリスマスマーケット #クリスマスカフェ  #関西クリスマスイベント 
+#大阪クリスマスイベント  #大阪クリスマス</div><a class="more" href="https://www.instagram.com/p/DSHGxGZElxM/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DR8bubckrfO/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.12.07"><img src="instagram-images/18088252885958313.jpg" alt="Instagram投稿 2025.12.07" loading="lazy"></a>
+      <div class="details"><div class="date">2025.12.07</div><div class="caption" tabindex="0">京都駅八条口から徒歩5分。
+都ホテルの中にあるカフェ「OMOFU」で、ちょっと贅沢なひととき☕️✨
+
+クリスマスツリーの灯りに包まれながら、
+マーブル模様のケーキと濃厚抹茶スイーツ、そしてアイスコーヒーでゆっくり休憩。
+静かで落ち着いた空間だから、ひとり時間にもぴったり。
+
+京都でほっとしたい時におすすめのカフェです🎄
+
+#京都カフェ　#京都駅カフェ　#京都駅八条口
+#都ホテル京都八条　#OMOFU  #おもふカフェ
+#カフェ時間　#カフェ巡り京都　#スイーツ巡り
+#抹茶スイーツ　#クリスマスカフェ</div><a class="more" href="https://www.instagram.com/p/DR8bubckrfO/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DRkBG2-EoVF/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.11.27"><img src="instagram-images/18086039303484123.jpg" alt="Instagram投稿 2025.11.27" loading="lazy"></a>
+      <div class="details"><div class="date">2025.11.27</div><div class="caption" tabindex="0">🍢こんにちは！西岡ゼミです！
+今回は「おでん」をテーマにご紹介します✨
+
+撮影でお邪魔したのは【三徳六味】さん！
+オープンキッチンで雰囲気も最高、
+ご飯もお酒もほんっとうに美味しかったです🤤
+
+おすすめは3枚目の「じゃがいも」と4枚目の「かしわ」！
+これからおでんが恋しくなる季節🍢
+気になった方はぜひ【保存】してチェックしてみてください👀💭
+
+#西岡ゼミ #三徳六味 #おでん #京都グルメ #龍谷大学</div><a class="more" href="https://www.instagram.com/p/DRkBG2-EoVF/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article>
+<article class="slide">
+      <a class="photo" href="https://www.instagram.com/p/DQyZDB6khT-/" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 2025.11.08"><img src="instagram-images/17863561761509184.jpg" alt="Instagram投稿 2025.11.08" loading="lazy"></a>
+      <div class="details"><div class="date">2025.11.08</div><div class="caption" tabindex="0">こんにちは！西岡ゼミ公式Instagramです🙌
+これからゼミメンバーの日常や、YouTube「西岡チューブ」に関する活動を発信していきます🎥✨
+皆さんにどんなメンバーか知っていただきたいので、初めに教室外での活動の写真を投稿します！
+2・3枚目はYouTube企画で参加した体育祭🏃‍♂️、4枚目は飲み会の様子です🍻
+やる時はやる、楽しむ時は全力で楽しむ！そんなオンオフの切り替えができるゼミです💪
+ぜひフォローして、私たちの雰囲気を感じてください！</div><a class="more" href="https://www.instagram.com/p/DQyZDB6khT-/" target="_blank" rel="noopener noreferrer">Instagramで見る ↗</a></div>
+    </article></div><button class="arrow next" type="button" aria-label="次の投稿">&#8250;</button><div class="dots" id="dots" aria-hidden="true"></div></div>
 <script>
 const gallery=document.getElementById('gallery');
-const slides=[...gallery.querySelectorAll('a')];
+const slides=[...gallery.querySelectorAll('.slide')];
 const dots=document.getElementById('dots');
 const wrap=document.getElementById('wrap');
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let current=0, timer;
-for(let i=0;i<Math.min(slides.length,10);i++){const dot=document.createElement('span');dot.className='dot';dots.appendChild(dot);}
-function render(){const all=[...dots.children];all.forEach((d,i)=>d.classList.toggle('active',i===current%all.length));}
-function go(i){if(!slides.length)return;current=(i+slides.length)%slides.length;gallery.scrollTo({left:slides[current].offsetLeft-slides[0].offsetLeft,behavior:reduced?'auto':'smooth'});render();}
-function start(){stop();if(!reduced&&slides.length>1)timer=setInterval(()=>go(current+1),4000);}
-function stop(){if(timer)clearInterval(timer);timer=null;}
+let current=0,timer=null,scrollTimer=null;
+const maxIndex=Math.max(0,slides.length-2);
+for(let i=0;i<=maxIndex&&i<10;i++){const dot=document.createElement('span');dot.className='dot';dots.appendChild(dot);}
+function render(){[...dots.children].forEach((d,i)=>d.classList.toggle('active',i===current));}
+function go(i){if(!slides.length)return;current=i>maxIndex?0:i<0?maxIndex:i;gallery.scrollTo({left:slides[current].offsetLeft-slides[0].offsetLeft,behavior:reduced?'auto':'smooth'});render();}
+function stop(){if(timer!==null){clearInterval(timer);timer=null;}}
+function start(){stop();if(!reduced&&slides.length>2&&!document.hidden)timer=setInterval(()=>go(current+1),4000);}
 document.querySelector('.prev').addEventListener('click',()=>{go(current-1);start();});
 document.querySelector('.next').addEventListener('click',()=>{go(current+1);start();});
-let scrollTimer;
-gallery.addEventListener('scroll',()=>{clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>{const width=gallery.clientWidth;if(width){current=Math.min(slides.length-1,Math.max(0,Math.round(gallery.scrollLeft/width)));render();}},120);},{passive:true});
+gallery.addEventListener('scroll',()=>{clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>{const step=slides.length>1?slides[1].offsetLeft-slides[0].offsetLeft:1;current=Math.min(maxIndex,Math.max(0,Math.round(gallery.scrollLeft/step)));render();},140);},{passive:true});
 wrap.addEventListener('mouseenter',stop);wrap.addEventListener('mouseleave',start);
 wrap.addEventListener('focusin',stop);wrap.addEventListener('focusout',start);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else start();});
