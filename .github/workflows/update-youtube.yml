@@ -27,6 +27,7 @@ jobs:
           import html
           import urllib.request
           import urllib.parse
+          from pathlib import Path
           from datetime import datetime, timezone, timedelta
 
           key = os.environ['YOUTUBE_API_KEY']
@@ -35,10 +36,12 @@ jobs:
           jst = timezone(timedelta(hours=9))
           news = []
           gallery = []
+          images_dir = Path('instagram-images')
+          images_dir.mkdir(exist_ok=True)
 
           def api_get(base, params):
               url = base + '?' + urllib.parse.urlencode(params)
-              with urllib.request.urlopen(url, timeout=30) as response:
+              with urllib.request.urlopen(url, timeout=40) as response:
                   return json.load(response)
 
           search = api_get('https://www.googleapis.com/youtube/v3/search', {
@@ -79,7 +82,8 @@ jobs:
                       first = children[0]
                       picture = first.get('thumbnail_url') if first.get('media_type') == 'VIDEO' else first.get('media_url')
               if picture:
-                  gallery.append({'datetime': dt, 'url': link, 'image': picture})
+                  gallery.append({'datetime': dt, 'url': link, 'image': picture,
+                                  'id': str(item['id'])})
           print('Instagram:', len(ig_data.get('data', [])), '件; 画像:', len(gallery), '件')
 
           news.sort(key=lambda x: x['datetime'], reverse=True)
@@ -93,10 +97,10 @@ jobs:
               date = item['datetime'].strftime('%Y.%m.%d')
               link = html.escape(item['url'], quote=True)
               entries.append(f'''<div class="news-item">
-                <div class="date">{date}</div>
-                <div class="message">{item['source']}がUPされました！</div>
-                <a class="button" href="{link}" target="_blank" rel="noopener noreferrer">クリック</a>
-              </div>''')
+            <div class="date">{date}</div>
+            <div class="message">{item['source']}がUPされました！</div>
+            <a class="button" href="{link}" target="_blank" rel="noopener noreferrer">クリック</a>
+          </div>''')
 
           with open('index.html', encoding='utf-8') as f:
               index = f.read()
@@ -112,10 +116,28 @@ jobs:
 
           tiles = []
           for item in gallery[:30]:
+              image_id = re.sub(r'[^A-Za-z0-9_-]', '_', item['id'])
+              image_path = images_dir / (image_id + '.jpg')
+              try:
+                  request = urllib.request.Request(item['image'], headers={'User-Agent': 'Mozilla/5.0'})
+                  with urllib.request.urlopen(request, timeout=40) as response:
+                      image_bytes = response.read(12 * 1024 * 1024 + 1)
+                      content_type = response.headers.get('Content-Type', '')
+                  if len(image_bytes) > 12 * 1024 * 1024:
+                      raise ValueError('画像サイズが12MBを超えています')
+                  if not content_type.lower().startswith('image/'):
+                      raise ValueError('画像以外のデータが返されました')
+                  image_path.write_bytes(image_bytes)
+              except Exception as exc:
+                  if not image_path.exists():
+                      print('画像保存失敗（スキップ）:', image_id, str(exc))
+                      continue
+                  print('既存画像を使用:', image_id)
               link = html.escape(item['url'], quote=True)
-              picture = html.escape(item['image'], quote=True)
               date = item['datetime'].strftime('%Y.%m.%d')
-              tiles.append(f'<a href="{link}" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 {date}"><img src="{picture}" alt="Instagram投稿 {date}" loading="lazy"></a>')
+              image_src = html.escape(image_path.as_posix(), quote=True)
+              tiles.append(f'<a href="{link}" target="_blank" rel="noopener noreferrer" aria-label="Instagram投稿 {date}"><img src="{image_src}" alt="Instagram投稿 {date}" loading="lazy"></a>')
+
           template = '''<!doctype html>
           <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
           <style>*{box-sizing:border-box}html,body{margin:0;background:transparent;font-family:Arial,sans-serif}
@@ -127,14 +149,14 @@ jobs:
           <body><div class="gallery">{{TILES}}</div></body></html>'''
           with open('instagram.html', 'w', encoding='utf-8') as f:
               f.write(template.replace('{{TILES}}', '\n'.join(tiles)))
-          print('合計NEWS:', len(news), '件 / Instagram画像:', len(tiles), '件')
+          print('合計NEWS:', len(news), '件 / 保存画像:', len(tiles), '件')
           PY
 
       - name: Save NEWS and Instagram gallery
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html instagram.html
+          git add index.html instagram.html instagram-images/
           if git diff --cached --quiet; then
             echo "NEWSとInstagram画像はすでに最新です"
           else
